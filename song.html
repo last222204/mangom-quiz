@@ -63,7 +63,15 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 .staff{height:56px;background:repeating-linear-gradient(to bottom,var(--staff) 0 2px,transparent 2px 12px);background-size:100% 50px;background-repeat:no-repeat;position:relative;margin:0 6px 10px}
 .staff::before{content:"𝄞";position:absolute;left:-2px;top:-18px;font-size:64px;line-height:1;color:var(--ink)}
 .staff .nt{position:absolute;width:13px;height:10px;border-radius:50%;background:var(--ink);transform:rotate(-20deg)}
-.lyric{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 4px;align-items:center}
+.lyric{display:flex;flex-direction:column;gap:10px}
+.lline{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 2px;align-items:center;padding:4px 6px;border-radius:12px}
+.lline .syl{font-size:clamp(20px,2.7vw,28px);min-width:1.05em;color:var(--soft)}
+.lline.cur{background:#fff7d1}
+.lline.cur .syl{color:var(--ink)}
+.lline .blank{font-size:clamp(20px,2.7vw,28px);min-width:3em;margin:0 4px}
+.lline .gap{width:.45em}
+.vhead{display:flex;justify-content:center;margin:-6px 0 6px}
+.vbig{font-family:var(--display);font-size:clamp(28px,3.6vw,36px);background:var(--pink);color:#fff;border:3px solid var(--ink);border-radius:999px;padding:2px 26px}
 .syl{font-family:var(--display);font-size:clamp(26px,4.2vw,40px);min-width:1.2em;text-align:center}
 .gap{width:.6em}
 .blank{font-family:var(--display);font-size:clamp(26px,4.2vw,40px);min-width:3.2em;padding:0 10px;border:3px dashed var(--pink);border-radius:14px;color:var(--pink);text-align:center;background:#fff2f7}
@@ -144,7 +152,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
   <!-- 3. 퀴즈 -->
   <section class="screen" id="quiz" hidden>
     <div class="row" style="align-items:center"><div class="progress" id="dots"></div><span class="verse" id="verse"></span></div>
-    <div class="sheet"><div class="staff" id="staff"></div><div class="lyric" id="lyric"></div></div>
+    <div class="sheet"><div class="vhead"><span class="vbig" id="verseBig"></span></div><div class="staff" id="staff"></div><div class="lyric" id="lyric"></div></div>
     <div class="opts" id="opts"></div>
     <p class="feedback" id="feedback" aria-live="polite"></p>
   </section>
@@ -161,21 +169,25 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 
 <script>
 /* 가사 빈칸 문제. 앞뒤 가사(before/after)와 정답, 오답 3개. 공백은 띄어쓰기 자리. */
+/* 망곰반송 가사 (악보 그대로). 문제는 [ ] 안이 빈칸이에요. */
+const VERSES={
+  "1절":["3학년 3반 망곰반이야 최고야 다잘해 친절해","망곰반은 최고야 망곰반은 친절해","망곰반은 뭐든잘해요 정말잘해 망곰반"],
+  "2절":["3학년 3반 노래가있어 망곰반 망곰반 똑똑반","망곰반은 멋있어 망곰반은 최고야","망곰반은 너무멋있어 으쓱으쓱 멋있다"]};
 const BANK=[
-  {v:"1절",before:"3학년 3반",answer:"망곰반",after:"이야",ta:1,wrong:["토끼반","판다반","곰돌반"]},
-  {v:"1절",before:"최고야 다잘해",answer:"친절해",after:"",wrong:["귀여워","똑똑해","멋있어"]},
-  {v:"1절",before:"망곰반은",answer:"최고야",after:"망곰반은 친절해",wrong:["귀여워","착해요","똑똑해"]},
-  {v:"1절",before:"망곰반은 뭐든",answer:"잘해요",tb:1,after:"",wrong:["좋아요","알아요","먹어요"]},
-  {v:"1절",before:"뭐든잘해요",answer:"정말잘해",after:"망곰반",wrong:["너무좋아","진짜멋져","최고최고"]},
-  {v:"2절",before:"3학년 3반",answer:"노래",after:"가있어",ta:1,wrong:["친구","리코더","망곰이"]},
-  {v:"2절",before:"망곰반 망곰반",answer:"똑똑",after:"반",ta:1,wrong:["씩씩","튼튼","행복"]},
-  {v:"2절",before:"망곰반은",answer:"멋있어",after:"망곰반은 최고야",wrong:["귀여워","친절해","똑똑해"]},
-  {v:"1절",before:"최고야",answer:"다잘해",after:"친절해",wrong:["다좋아","다멋져","다귀여워"]},
-  {v:"1절",before:"망곰반은 최고야 망곰반은",answer:"친절해",after:"",wrong:["멋있어","똑똑해","귀여워"]},
-  {v:"2절",before:"망곰반은 너무",answer:"멋있어",after:"으쓱으쓱",wrong:["귀여워","똑똑해","친절해"],tb:1},
-  {v:"2절",before:"망곰반은 멋있어 망곰반은",answer:"최고야",after:"",wrong:["친절해","귀여워","똑똑해"]},
-  {v:"2절",before:"",answer:"으쓱으쓱",after:"멋있다",wrong:["반짝반짝","룰루랄라","쑥쑥쑥쑥"]}
-];
+  {v:"1절",ln:0,q:"3학년 3반 [망곰반]이야 최고야 다잘해 친절해",wrong:["토끼반","판다반","곰돌반"]},
+  {v:"1절",ln:0,q:"3학년 3반 망곰반이야 최고야 [다잘해] 친절해",wrong:["다좋아","다멋져","다귀여워"]},
+  {v:"1절",ln:0,q:"3학년 3반 망곰반이야 최고야 다잘해 [친절해]",wrong:["귀여워","똑똑해","멋있어"]},
+  {v:"1절",ln:1,q:"망곰반은 [최고야] 망곰반은 친절해",wrong:["귀여워","착해요","똑똑해"]},
+  {v:"1절",ln:1,q:"망곰반은 최고야 망곰반은 [친절해]",wrong:["멋있어","똑똑해","귀여워"]},
+  {v:"1절",ln:2,q:"망곰반은 뭐든[잘해요] 정말잘해 망곰반",wrong:["좋아요","알아요","먹어요"]},
+  {v:"1절",ln:2,q:"망곰반은 뭐든잘해요 [정말잘해] 망곰반",wrong:["너무좋아","진짜멋져","최고최고"]},
+  {v:"2절",ln:0,q:"3학년 3반 [노래]가있어 망곰반 망곰반 똑똑반",wrong:["친구","리코더","망곰이"]},
+  {v:"2절",ln:0,q:"3학년 3반 노래가있어 망곰반 망곰반 [똑똑]반",wrong:["씩씩","튼튼","행복"]},
+  {v:"2절",ln:1,q:"망곰반은 [멋있어] 망곰반은 최고야",wrong:["귀여워","친절해","똑똑해"]},
+  {v:"2절",ln:1,q:"망곰반은 멋있어 망곰반은 [최고야]",wrong:["친절해","귀여워","똑똑해"]},
+  {v:"2절",ln:2,q:"망곰반은 너무[멋있어] 으쓱으쓱 멋있다",wrong:["귀여워","똑똑해","친절해"]},
+  {v:"2절",ln:2,q:"망곰반은 너무멋있어 [으쓱으쓱] 멋있다",wrong:["반짝반짝","룰루랄라","쑥쑥쑥쑥"]}
+].map(o=>({...o,answer:o.q.match(/\[(.+)\]/)[1]}));
 const ROUND=3;
 const $=id=>document.getElementById(id);
 const screens=["home","listen","quiz","result"];
@@ -193,8 +205,11 @@ function drawStaff(){
 function ask(){
   const q=qs[qi];
   $("dots").innerHTML=qs.map((_,i)=>`<span class="dot ${i<qi?results[i]?"ok":"no":i===qi?"now":""}"></span>`).join("")+`<span>${qi+1} / ${ROUND}</span>`;
-  $("verse").textContent=q.v;
-  $("lyric").innerHTML=sylls(q.before)+(q.before?'<span class="gap"></span>':"")+'<span class="blank" id="blank">?</span>'+(q.after?'<span class="gap"></span>'+sylls(q.after):"");
+  $("verse").textContent=q.v;$("verseBig").textContent=q.v+" 가사";
+  $("lyric").innerHTML=VERSES[q.v].map((line,i)=>{
+    if(i!==q.ln)return `<div class="lline">${sylls(line)}</div>`;
+    const [a,rest]=q.q.split("[");const b=rest.split("]")[1];
+    return `<div class="lline cur">${sylls(a)}<span class="blank" id="blank">?</span>${sylls(b)}</div>`}).join("");
   $("opts").innerHTML=shuffle([q.answer,...shuffle(q.wrong).slice(0,2)]).map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("");
   $("feedback").textContent="";$("feedback").className="feedback";
   drawStaff();show("quiz");
@@ -215,7 +230,7 @@ function finish(pass){
   $("resTitle").textContent=pass?"3문제 모두 정답!":"아쉬워요!";
   $("resTitle").className="result-title"+(pass?" win":"");
   $("resSub").textContent=pass?"망곰반송을 완벽하게 들었네요. 통과 도장 꽝!":`${ROUND}문제 중 ${results.filter(Boolean).length}문제 맞혔어요. ${ROUND}문제 모두 맞혀야 통과예요.`;
-  $("review").innerHTML=qs.map((q,i)=>`<li class="${results[i]?"ok":"no"}"><span class="mk">${results[i]?"⭕":"❌"}</span><span>${q.before}${q.tb?"":" "}<b>${q.answer}</b>${q.ta?"":" "}${q.after}</span><span class="verse">${q.v}</span></li>`).join("");
+  $("review").innerHTML=qs.map((q,i)=>`<li class="${results[i]?"ok":"no"}"><span class="mk">${results[i]?"⭕":"❌"}</span><span>${q.q.replace("[","<b>").replace("]","</b>")}</span><span class="verse">${q.v}</span></li>`).join("");
   show("result");
 }
 let player=null,apiReady=false,ended=false,loadTimer=null;
