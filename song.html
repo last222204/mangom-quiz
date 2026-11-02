@@ -69,8 +69,8 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 .blank{font-family:var(--display);font-size:clamp(26px,4.2vw,40px);min-width:3.2em;padding:0 10px;border:3px dashed var(--pink);border-radius:14px;color:var(--pink);text-align:center;background:#fff2f7}
 .blank.ok{border-style:solid;border-color:var(--green);color:var(--green);background:#eafaf0}
 .blank.no{border-style:solid;border-color:var(--red);color:var(--red);background:#fff0f0}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:700px}
-.opt{font-family:var(--display);font-size:40px;padding:26px 16px;border:3px solid var(--ink);border-radius:18px;background:#fff;cursor:pointer;color:var(--ink);touch-action:manipulation;box-shadow:0 5px 0 var(--ink)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:820px}
+.opt{font-family:var(--display);font-size:clamp(28px,3.6vw,38px);padding:24px 10px;border:3px solid var(--ink);border-radius:18px;background:#fff;cursor:pointer;color:var(--ink);touch-action:manipulation;box-shadow:0 5px 0 var(--ink)}
 .opt:nth-child(1){background:#ffe3ee} .opt:nth-child(2){background:#fff4c7} .opt:nth-child(3){background:#e2f1ff} .opt:nth-child(4){background:#efe5ff}
 .opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
 .opt.ok{background:var(--green)!important;color:#fff} .opt.no{background:var(--red)!important;color:#fff}
@@ -128,7 +128,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
     </div>
     <ul class="rules">
       <li><b>①</b> 리코더 망곰반송을 한 번 들어요</li>
-      <li><b>②</b> 가사 빈칸 3문제 (둘 중 하나 고르기)</li>
+      <li><b>②</b> 가사 빈칸 3문제 (셋 중 하나 고르기)</li>
       <li><b>③</b> 3문제 모두 맞히면 통과!</li>
     </ul>
     <button class="btn big" id="startBtn">노래 들으러 가기</button>
@@ -137,7 +137,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
   <!-- 2. 노래 듣기 -->
   <section class="screen" id="listen" hidden>
     <p class="sub" style="font-family:var(--display);font-size:30px;color:var(--ink)">잘 들어 보세요! 노래는 <span style="color:var(--pink)">딱 한 번</span>만 들을 수 있어요.</p>
-    <div class="player" id="playerBox"><div id="yt"></div><div class="shield" id="shield" hidden></div><button class="resume" id="resume" hidden>▶ 계속</button><button class="skip" id="skipBtn" type="button">건너뛰기 ›</button></div><p class="vmsg" id="vmsg">영상 가운데 ▶ 버튼을 눌러 노래를 들어요. 끝까지 들어야 문제를 풀 수 있어요.</p><p class="small" id="fallback" hidden>영상이 안 나오면 <a href="https://youtu.be/nTIIPxHjxZs" target="_blank" rel="noopener" id="ytLink">유튜브에서 열기</a></p><div class="lyrics" id="lyrics"></div><div class="sync" id="syncPanel" hidden><b>가사 타이밍 기록 모드</b><p class="small" id="syncHint">영상을 재생하고, 아래에 나온 줄이 <b>노래로 시작되는 순간</b> 버튼을 눌러요.</p><button class="btn" id="syncBtn" type="button">이 줄 시작!</button><code id="syncOut">TIMES = []</code><button class="btn pink" id="syncReset" type="button" style="font-size:20px;padding:8px 22px">처음부터 다시</button></div>
+    <div class="player" id="playerBox"><div id="yt"></div><div class="shield" id="shield" hidden></div><button class="resume" id="resume" hidden>▶ 계속</button><button class="skip" id="skipBtn" type="button">건너뛰기 ›</button></div><p class="vmsg" id="vmsg">영상 가운데 ▶ 버튼을 눌러 노래를 들어요. 끝까지 들어야 문제를 풀 수 있어요.</p><p class="small" id="fallback" hidden>영상이 안 나오면 <a href="https://youtu.be/nTIIPxHjxZs" target="_blank" rel="noopener" id="ytLink">유튜브에서 열기</a></p><div class="lyrics" id="lyrics" hidden></div><div class="sync" id="syncPanel" hidden><b>가사 타이밍 기록 모드</b><p class="small" id="syncHint">영상을 재생하고, 아래에 나온 줄이 <b>노래로 시작되는 순간</b> 버튼을 눌러요.</p><button class="btn" id="syncBtn" type="button">이 줄 시작!</button><code id="syncOut">TIMES = []</code><button class="btn pink" id="syncReset" type="button" style="font-size:20px;padding:8px 22px">처음부터 다시</button></div>
     <button class="btn pink" id="readyBtn">다 들었어요! 문제 풀기</button>
   </section>
 
@@ -170,6 +170,10 @@ const BANK=[
   {v:"2절",before:"3학년 3반",answer:"노래",after:"가있어",ta:1,wrong:["친구","리코더","망곰이"]},
   {v:"2절",before:"망곰반 망곰반",answer:"똑똑",after:"반",ta:1,wrong:["씩씩","튼튼","행복"]},
   {v:"2절",before:"망곰반은",answer:"멋있어",after:"망곰반은 최고야",wrong:["귀여워","친절해","똑똑해"]},
+  {v:"1절",before:"최고야",answer:"다잘해",after:"친절해",wrong:["다좋아","다멋져","다귀여워"]},
+  {v:"1절",before:"망곰반은 최고야 망곰반은",answer:"친절해",after:"",wrong:["멋있어","똑똑해","귀여워"]},
+  {v:"2절",before:"망곰반은 너무",answer:"멋있어",after:"으쓱으쓱",wrong:["귀여워","똑똑해","친절해"],tb:1},
+  {v:"2절",before:"망곰반은 멋있어 망곰반은",answer:"최고야",after:"",wrong:["친절해","귀여워","똑똑해"]},
   {v:"2절",before:"",answer:"으쓱으쓱",after:"멋있다",wrong:["반짝반짝","룰루랄라","쑥쑥쑥쑥"]}
 ];
 const ROUND=3;
@@ -191,7 +195,7 @@ function ask(){
   $("dots").innerHTML=qs.map((_,i)=>`<span class="dot ${i<qi?results[i]?"ok":"no":i===qi?"now":""}"></span>`).join("")+`<span>${qi+1} / ${ROUND}</span>`;
   $("verse").textContent=q.v;
   $("lyric").innerHTML=sylls(q.before)+(q.before?'<span class="gap"></span>':"")+'<span class="blank" id="blank">?</span>'+(q.after?'<span class="gap"></span>'+sylls(q.after):"");
-  $("opts").innerHTML=shuffle([q.answer,q.wrong[Math.random()*q.wrong.length|0]]).map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("");
+  $("opts").innerHTML=shuffle([q.answer,...shuffle(q.wrong).slice(0,2)]).map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("");
   $("feedback").textContent="";$("feedback").className="feedback";
   drawStaff();show("quiz");
 }
@@ -223,19 +227,20 @@ function showFallback(){$("fallback").hidden=false;msg("영상을 불러오지 �
 function buildPlayer(){
   player=new YT.Player("yt",{videoId:"nTIIPxHjxZs",playerVars:{controls:0,disablekb:1,rel:0,playsinline:1,fs:0,iv_load_policy:3},
     events:{onStateChange:e=>{
+      $("lyrics").hidden=e.data!==YT.PlayerState.PLAYING;
       if(e.data===YT.PlayerState.PLAYING){$("shield").hidden=false;$("resume").hidden=true;msg("잘 들어 보세요! 🎵")}
       else if(e.data===YT.PlayerState.PAUSED&&!ended){$("resume").hidden=false}
       else if(e.data===YT.PlayerState.ENDED){ended=true;$("resume").hidden=true;setReady(true);msg("노래 끝! 이제 문제를 풀어요.")}
     },onError:showFallback}});
 }
 function resetListen(){
-  ended=false;setReady(false);$("fallback").hidden=true;$("shield").hidden=true;$("resume").hidden=true;
+  ended=false;setReady(false);$("lyrics").hidden=true;$("fallback").hidden=true;$("shield").hidden=true;$("resume").hidden=true;
   msg("영상 가운데 ▶ 버튼을 눌러 노래를 들어요. 끝까지 들어야 문제를 풀 수 있어요.");
   if(player&&player.seekTo){try{player.stopVideo();player.seekTo(0,false);player.pauseVideo()}catch(e){}return}
   clearInterval(loadTimer);let tries=0;
   loadTimer=setInterval(()=>{if(apiReady){clearInterval(loadTimer);buildPlayer()}else if(++tries>40){clearInterval(loadTimer);showFallback()}},250);
 }
-function stopVideo(){try{player&&player.stopVideo()}catch(e){}}
+function stopVideo(){$("lyrics").hidden=true;try{player&&player.stopVideo()}catch(e){}}
 const LINES=[
  {v:"1절",t:"3학년 3반 망곰반이야 최고야 다잘해 친절해"},
  {v:"1절",t:"망곰반은 최고야 망곰반은 친절해"},
