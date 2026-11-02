@@ -48,7 +48,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 .btn.red{background:#ff4e45;color:#fff}
 .btn[disabled]{opacity:.45;pointer-events:none}
 /* listen */
-.player{width:100%;max-width:760px;aspect-ratio:16/9;border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#000}
+.player{width:100%;max-width:620px;aspect-ratio:16/9;border:3px solid var(--ink);border-radius:18px;overflow:hidden;background:#000}
 .player iframe{width:100%;height:100%;border:0;display:block}
 .yt{display:flex;flex-direction:column;align-items:center;gap:14px;background:#fff;border:3px solid var(--ink);border-radius:22px;padding:28px 24px;max-width:560px;width:100%}
 .yt .play{width:84px;height:60px;border-radius:16px;background:#ff4e45;position:relative}
@@ -69,8 +69,8 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 .blank{font-family:var(--display);font-size:clamp(26px,4.2vw,40px);min-width:3.2em;padding:0 10px;border:3px dashed var(--pink);border-radius:14px;color:var(--pink);text-align:center;background:#fff2f7}
 .blank.ok{border-style:solid;border-color:var(--green);color:var(--green);background:#eafaf0}
 .blank.no{border-style:solid;border-color:var(--red);color:var(--red);background:#fff0f0}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:640px}
-.opt{font-family:var(--display);font-size:32px;padding:16px;border:3px solid var(--ink);border-radius:18px;background:#fff;cursor:pointer;color:var(--ink);touch-action:manipulation;box-shadow:0 5px 0 var(--ink)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:700px}
+.opt{font-family:var(--display);font-size:40px;padding:26px 16px;border:3px solid var(--ink);border-radius:18px;background:#fff;cursor:pointer;color:var(--ink);touch-action:manipulation;box-shadow:0 5px 0 var(--ink)}
 .opt:nth-child(1){background:#ffe3ee} .opt:nth-child(2){background:#fff4c7} .opt:nth-child(3){background:#e2f1ff} .opt:nth-child(4){background:#efe5ff}
 .opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
 .opt.ok{background:var(--green)!important;color:#fff} .opt.no{background:var(--red)!important;color:#fff}
@@ -97,6 +97,17 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
 .resume{position:absolute;inset:0;margin:auto;width:150px;height:150px;border-radius:50%;border:4px solid var(--ink);background:var(--pink);color:#fff;font-family:var(--display);font-size:28px;cursor:pointer;box-shadow:0 6px 0 var(--ink)}
 .vmsg{font-size:18px;color:var(--soft);margin:0;text-align:center;min-height:1.3em;text-wrap:balance}
 .vmsg.err{color:var(--red)}
+.lyrics{width:100%;max-width:760px;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:12px 16px}
+.lyrics.static{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px}
+.lyrics h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 0 2px;color:var(--pink)}
+.lyrics .ln{font-family:var(--display);font-size:clamp(17px,2.2vw,21px);margin:0;color:var(--ink)}
+.lyrics.karaoke{text-align:center;display:flex;flex-direction:column;gap:6px}
+.lyrics.karaoke .now{font-size:clamp(26px,4vw,38px);color:var(--ink);min-height:1.3em}
+.lyrics.karaoke .next{font-size:clamp(17px,2.2vw,22px);color:var(--soft);min-height:1.3em}
+.lyrics.karaoke .vtag{font-family:var(--display);font-size:15px;color:var(--pink)}
+.sync{width:100%;max-width:760px;background:#fff8d6;border:3px dashed var(--ink);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.sync code{font-size:18px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 12px;user-select:text;-webkit-user-select:text;word-break:break-all}
+@media (max-width:640px){.lyrics.static{grid-template-columns:1fr}}
 </style>
 
 </head><body>
@@ -113,7 +124,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
     </div>
     <ul class="rules">
       <li><b>①</b> 리코더 망곰반송을 한 번 들어요</li>
-      <li><b>②</b> 가사 빈칸 3문제</li>
+      <li><b>②</b> 가사 빈칸 3문제 (둘 중 하나 고르기)</li>
       <li><b>③</b> 3문제 모두 맞히면 통과!</li>
     </ul>
     <button class="btn big" id="startBtn">노래 들으러 가기</button>
@@ -122,7 +133,7 @@ h1 span{text-shadow:0 4px 0 #fff,0 5px 0 var(--ink)}
   <!-- 2. 노래 듣기 -->
   <section class="screen" id="listen" hidden>
     <p class="sub" style="font-family:var(--display);font-size:30px;color:var(--ink)">잘 들어 보세요! 노래는 <span style="color:var(--pink)">딱 한 번</span>만 들을 수 있어요.</p>
-    <div class="player" id="playerBox"><div id="yt"></div><div class="shield" id="shield" hidden></div><button class="resume" id="resume" hidden>▶ 계속</button></div><p class="vmsg" id="vmsg">영상 가운데 ▶ 버튼을 눌러 노래를 들어요. 끝까지 들어야 문제를 풀 수 있어요.</p><p class="small" id="fallback" hidden>영상이 안 나오면 <a href="https://youtu.be/nTIIPxHjxZs" target="_blank" rel="noopener" id="ytLink">유튜브에서 열기</a></p>
+    <div class="player" id="playerBox"><div id="yt"></div><div class="shield" id="shield" hidden></div><button class="resume" id="resume" hidden>▶ 계속</button></div><p class="vmsg" id="vmsg">영상 가운데 ▶ 버튼을 눌러 노래를 들어요. 끝까지 들어야 문제를 풀 수 있어요.</p><p class="small" id="fallback" hidden>영상이 안 나오면 <a href="https://youtu.be/nTIIPxHjxZs" target="_blank" rel="noopener" id="ytLink">유튜브에서 열기</a></p><div class="lyrics" id="lyrics"></div><div class="sync" id="syncPanel" hidden><b>가사 타이밍 기록 모드</b><p class="small" id="syncHint">영상을 재생하고, 아래에 나온 줄이 <b>노래로 시작되는 순간</b> 버튼을 눌러요.</p><button class="btn" id="syncBtn" type="button">이 줄 시작!</button><code id="syncOut">TIMES = []</code><button class="btn pink" id="syncReset" type="button" style="font-size:20px;padding:8px 22px">처음부터 다시</button></div>
     <button class="btn pink" id="readyBtn">다 들었어요! 문제 풀기</button>
   </section>
 
@@ -176,7 +187,7 @@ function ask(){
   $("dots").innerHTML=qs.map((_,i)=>`<span class="dot ${i<qi?results[i]?"ok":"no":i===qi?"now":""}"></span>`).join("")+`<span>${qi+1} / ${ROUND}</span>`;
   $("verse").textContent=q.v;
   $("lyric").innerHTML=sylls(q.before)+(q.before?'<span class="gap"></span>':"")+'<span class="blank" id="blank">?</span>'+(q.after?'<span class="gap"></span>'+sylls(q.after):"");
-  $("opts").innerHTML=shuffle([q.answer,...q.wrong]).map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("");
+  $("opts").innerHTML=shuffle([q.answer,q.wrong[Math.random()*q.wrong.length|0]]).map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join("");
   $("feedback").textContent="";$("feedback").className="feedback";
   drawStaff();show("quiz");
 }
@@ -221,6 +232,43 @@ function resetListen(){
   loadTimer=setInterval(()=>{if(apiReady){clearInterval(loadTimer);buildPlayer()}else if(++tries>40){clearInterval(loadTimer);showFallback()}},250);
 }
 function stopVideo(){try{player&&player.stopVideo()}catch(e){}}
+const LINES=[
+ {v:"1절",t:"3학년 3반 망곰반이야 최고야 다잘해 친절해"},
+ {v:"1절",t:"망곰반은 최고야 망곰반은 친절해"},
+ {v:"1절",t:"망곰반은 뭐든잘해요 정말잘해 망곰반"},
+ {v:"2절",t:"3학년 3반 노래가있어 망곰반 망곰반 똑똑반"},
+ {v:"2절",t:"망곰반은 멋있어 망곰반은 최고야"},
+ {v:"2절",t:"망곰반은 너무멋있어 으쓱으쓱 멋있다"}];
+/* 줄마다 노래가 시작되는 시각(초). 타이밍 기록 모드(#sync)로 잰 값을 넣으면 가사가 노래에 맞춰 바뀌어요. 비어 있으면 가사 전체를 보여줘요. */
+const TIMES=[];
+const LINE_END=4;
+const synced=TIMES.length===LINES.length;
+function renderLyrics(){
+  const box=$("lyrics");
+  if(!synced){box.className="lyrics static";
+    box.innerHTML=["1절","2절"].map(v=>`<div><h3>${v}</h3>${LINES.filter(l=>l.v===v).map(l=>`<p class="ln">${l.t}</p>`).join("")}</div>`).join("");return}
+  box.className="lyrics karaoke";box.innerHTML='<span class="vtag" id="lyV"></span><p class="ln now" id="lyNow">🎵</p><p class="ln next" id="lyNext"></p>';
+}
+let lastIdx=-2;
+setInterval(()=>{
+  if(!synced||!player||!player.getCurrentTime||$("listen").hidden)return;
+  const ct=player.getCurrentTime();let i=-1;
+  TIMES.forEach((s,k)=>{if(ct>=s)i=k});
+  if(i===lastIdx)return;lastIdx=i;
+  $("lyNow").textContent=i<0?"🎵 곧 시작해요":LINES[i].t;
+  $("lyV").textContent=i<0?"":LINES[i].v;
+  $("lyNext").textContent=LINES[i+1]?LINES[i+1].t:"";
+},150);
+renderLyrics();
+/* 타이밍 기록 모드: 주소 끝에 #sync */
+let rec=[];
+function syncShow(){const n=rec.length;$("syncBtn").textContent=n<LINES.length?`이 줄 시작! (${n+1}/${LINES.length})`:"기록 끝!";
+  $("syncBtn").disabled=n>=LINES.length;
+  $("syncHint").innerHTML=n<LINES.length?`다음 줄: <b>${LINES[n].v} · ${LINES[n].t}</b>`:"아래 TIMES 줄을 그대로 복사해서 Claude에게 보내 주세요.";
+  $("syncOut").textContent="TIMES = ["+rec.join(", ")+"]"}
+if(location.hash==="#sync"){$("syncPanel").hidden=false;syncShow()}
+$("syncBtn").onclick=()=>{if(!player||!player.getCurrentTime)return;rec.push(+player.getCurrentTime().toFixed(1));syncShow()};
+$("syncReset").onclick=()=>{rec=[];lastIdx=-2;try{player.seekTo(0,true)}catch(e){}syncShow()};
 $("resume").onclick=()=>{try{player.playVideo()}catch(e){}};
 $("ytLink").addEventListener("click",()=>setTimeout(()=>setReady(true),3000));
 $("startBtn").onclick=()=>{resetListen();show("listen")};
