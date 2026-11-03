@@ -53,7 +53,7 @@ h1 .m{color:var(--pink)}
 .secs.hurry{color:var(--red);animation:pulse .5s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.15)}}
 .ask{font-family:var(--display);font-size:clamp(26px,4vw,36px);margin:0;text-align:center}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:820px}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,440px));justify-content:center;gap:20px;width:100%;max-width:820px}
 .q{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .q img{width:min(100%,220px);aspect-ratio:1;object-fit:contain;mix-blend-mode:multiply}
 .q .name{font-family:var(--display);font-size:30px}
@@ -136,9 +136,9 @@ const IMG={rabbit:"data:image/webp;base64,UklGRlojAABXRUJQVlA4IE4jAAAwgACdASrFAG
 const CHARS=[
   {id:"rabbit",name:"토끼망곰"},{id:"fox",name:"여우망곰"},
   {id:"cat",name:"냥이망곰"},{id:"panda",name:"판다망곰"}];
-const DEFAULTS={rabbit:12,fox:14,cat:11,panda:13,time:30};
+const DEFAULTS={rabbit:16,fox:16,cat:17,panda:16,time:60};
 let cfg={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem("mangom-cfg")||"null");if(s)cfg={...cfg,...s}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem("mangom-cfg-v2")||"null");if(s)cfg={...cfg,...s}}catch(e){}
 
 const $=id=>document.getElementById(id);
 const screens=["home","quiz","result","settings"];
@@ -149,9 +149,9 @@ $("gang").innerHTML=CHARS.map(c=>`<figure><img src="${IMG[c.id]}" alt="${c.name}
 let picks=[],counts={},timer=null,endAt=0,done=false;
 
 function start(){
-  picks=[...CHARS].sort(()=>Math.random()-.5).slice(0,2);
+  picks=[CHARS[Math.random()*CHARS.length|0]];
   counts={};picks.forEach(c=>counts[c.id]=0);done=false;
-  $("ask").textContent=`${picks[0].name}과 ${picks[1].name}, 각각 몇 마리일까요?`;
+  $("ask").textContent=`부스 안에 ${picks[0].name}은 몇 마리일까요?`;
   $("pair").innerHTML=picks.map(c=>`
     <div class="q"><img src="${IMG[c.id]}" alt=""><div class="name">${c.name}</div>
       <div class="counter">
@@ -179,7 +179,7 @@ function finish(timeUp){
   if(done)return;done=true;clearInterval(timer);
   const res=picks.map(c=>({...c,guess:counts[c.id],ans:+cfg[c.id],ok:counts[c.id]===+cfg[c.id]}));
   const all=res.every(r=>r.ok),some=res.some(r=>r.ok);
-  $("resTitle").textContent=all?"모두 정답! 🎉":some?"아깝다! 하나 맞혔어요":"아쉬워요!";
+  $("resTitle").textContent=all?"정답! 🎉":"아쉬워요!";
   $("resTitle").className="result-title"+(all?" win":"");
   $("resSub").textContent=timeUp?"시간 종료! 제출된 숫자로 채점했어요.":all?"망곰이 눈썰미 인정!":"부스를 다시 둘러보고 도전해 보세요.";
   $("resPair").innerHTML=res.map(r=>`
@@ -199,7 +199,7 @@ $("setForm").addEventListener("submit",e=>{
   e.preventDefault();
   CHARS.forEach(c=>cfg[c.id]=Math.max(0,parseInt($("set-"+c.id).value)||0));
   cfg.time=Math.min(300,Math.max(5,parseInt($("set-time").value)||30));
-  try{localStorage.setItem("mangom-cfg",JSON.stringify(cfg))}catch(err){}
+  try{localStorage.setItem("mangom-cfg-v2",JSON.stringify(cfg))}catch(err){}
   document.querySelector("#home .sub").textContent=`부스 안에 숨은 망곰이들, ${cfg.time}초 안에 몇 마리인지 세어 보세요!`;
   show("home");
 });
