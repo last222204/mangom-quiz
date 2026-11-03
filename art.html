@@ -80,12 +80,6 @@ h1 .m{color:var(--pink)}
 .result-title{font-family:var(--display);font-size:clamp(44px,8vw,72px);margin:0;text-align:center}
 .result-title.win{color:var(--pink);text-shadow:3px 3px 0 var(--yellow)}
 .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-/* settings */
-.panel{width:100%;max-width:560px;background:#fff;border:3px solid var(--ink);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:14px}
-.panel h2{font-family:var(--display);font-weight:400;margin:0;font-size:30px}
-.panel p{margin:0;color:var(--soft);font-size:16px}
-.field{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:20px}
-.field input{width:110px;font-size:24px;padding:8px 10px;border:2px solid var(--ink);border-radius:12px;text-align:center;font-family:var(--display);user-select:text;-webkit-user-select:text;background:var(--paper);color:var(--ink)}
 @media (max-width:640px){
   .intro{grid-template-columns:1fr}
   .gang{grid-template-columns:repeat(2,1fr)}
@@ -137,18 +131,6 @@ h1 .m{color:var(--pink)}
     <div class="row"><button class="btn" id="againBtn">처음으로</button></div>
   </section>
 
-  <!-- 운영자 설정 -->
-  <section class="screen" id="settings" hidden>
-    <form class="panel" id="setForm">
-      <h2>운영자 설정</h2>
-      <p>부스에 실제로 놓인 그림 수를 입력하세요. 이 태블릿에 저장됩니다.</p>
-      <div id="setFields"></div>
-      <label class="field" for="set-time">제한 시간(초)<input id="set-time" type="number" inputmode="numeric" min="5" max="300"></label>
-      <div class="row"><button type="submit" class="btn">저장</button><button type="button" class="btn pink" id="closeSet">닫기</button></div>
-    </form>
-  </section>
-
-  <button class="icon" id="setBtn">⚙ 운영자 설정</button>
 </div>
 
 <script>
@@ -158,12 +140,12 @@ const CHARS=[
   {id:"cat",name:"냥이망곰"},{id:"panda",name:"판다망곰"}];
 const DEFAULTS={rabbit:17,fox:18,cat:20,panda:16,time:60};
 let cfg={...DEFAULTS};
-try{const s=JSON.parse(localStorage.getItem("mangom-cfg-v3")||"null");if(s)cfg={...cfg,...s}}catch(e){}
+try{localStorage.removeItem("mangom-cfg");localStorage.removeItem("mangom-cfg-v2");localStorage.removeItem("mangom-cfg-v3")}catch(e){}
 
 const $=id=>document.getElementById(id);
 function updateHome(){$("howTime").textContent=cfg.time+"초";$("totalN").textContent=CHARS.reduce((s,c)=>s+(+cfg[c.id]||0),0)}
-const screens=["home","quiz","result","settings"];
-function show(id){screens.forEach(s=>$(s).hidden=s!==id);$("setBtn").hidden=id!=="home"}
+const screens=["home","quiz","result"];
+function show(id){screens.forEach(s=>$(s).hidden=s!==id)}
 
 $("gang").innerHTML=CHARS.map(c=>`<figure><img src="${IMG[c.id]}" alt="${c.name}"><figcaption>${c.name}</figcaption></figure>`).join("");
 
@@ -205,25 +187,13 @@ function finish(timeUp){
   $("resSub").textContent=timeUp?"시간 종료! 제출된 숫자로 채점했어요.":all?"망곰이 눈썰미 인정!":"부스를 다시 둘러보고 도전해 보세요.";
   $("resPair").innerHTML=res.map(r=>`
     <div class="q ${r.ok?"ok":"no"}"><img src="${IMG[r.id]}" alt=""><div class="name">${r.name}</div>
-      <div class="verdict ${r.ok?"ok":"no"}">${r.ok?"정답 ⭕":"오답 ❌"} · 내 답 ${r.guess}</div>
-      ${r.ok?"":`<div class="sub">정답은 ${r.ans}마리</div>`}</div>`).join("");
+      <div class="verdict ${r.ok?"ok":"no"}">${r.ok?"정답 ⭕":"오답 ❌"} · 내 답 ${r.guess}</div></div>`).join("");
   show("result");
 }
 $("startBtn").onclick=start;
 $("submitBtn").onclick=()=>finish(false);
 $("againBtn").onclick=()=>show("home");
 
-$("setFields").innerHTML=CHARS.map(c=>`<label class="field" for="set-${c.id}">${c.name}<input id="set-${c.id}" type="number" inputmode="numeric" min="0" max="99"></label>`).join("");
-$("setBtn").onclick=()=>{CHARS.forEach(c=>$("set-"+c.id).value=cfg[c.id]);$("set-time").value=cfg.time;show("settings")};
-$("closeSet").onclick=()=>show("home");
-$("setForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  CHARS.forEach(c=>cfg[c.id]=Math.max(0,parseInt($("set-"+c.id).value)||0));
-  cfg.time=Math.min(300,Math.max(5,parseInt($("set-time").value)||30));
-  try{localStorage.setItem("mangom-cfg-v3",JSON.stringify(cfg))}catch(err){}
-  updateHome();
-  show("home");
-});
 updateHome();
 try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(()=>{})}catch(e){}
 </script>
